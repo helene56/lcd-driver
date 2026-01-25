@@ -143,6 +143,7 @@ uint8_t i2c_read_bit()
 {
     sda_release_high();
     scl_release_high();
+    while (!scl_read()) { }
     i2c_delay();
 
     uint8_t bit = sda_read();
@@ -151,6 +152,22 @@ uint8_t i2c_read_bit()
 
     return bit;
     
+}
+
+
+uint8_t i2c_write_byte(uint8_t byte)
+{
+    for (int i = 7; i >= 0; --i) // msb to lsb
+    {
+        // shift to the next bit 
+        uint8_t bit = (byte >> i) & 1;
+        i2c_write_bit(bit);
+    }
+
+
+    // Read ACK bit (0 = ACK, 1 = NACK)
+    uint8_t ack = i2c_read_bit();
+    return (ack == 0);
 }
 
 
@@ -170,17 +187,12 @@ int main()
     
     // try setting sda to output
     // TRISAbits.TRISA4 = 0;
-
+    uint8_t test_byte = 0b00101110;
     while (1)
     {
         // i2c_start();
         // i2c_stop();
-        i2c_write_bit(1);
-        i2c_write_bit(0);
-        i2c_write_bit(1);
-        i2c_write_bit(1);
-        i2c_write_bit(1);
-        i2c_write_bit(0);
+        i2c_write_byte(test_byte);
 
     } // infinite loop
 
