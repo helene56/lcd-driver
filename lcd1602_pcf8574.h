@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void LCD1602_init2(uint8_t cols, uint8_t rows);
+void LCD1602_init(uint8_t cols, uint8_t rows);
 void LCD1602_clear(void);
 void LCD1602_home(void);
 

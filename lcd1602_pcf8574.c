@@ -121,7 +121,7 @@ void LCD1602_backlight(uint8_t on)
     pcf_write(0x00);
 }
 
-void LCD1602_init2(uint8_t cols, uint8_t rows)
+void LCD1602_init(uint8_t cols, uint8_t rows)
 {
     (void)cols;
 
