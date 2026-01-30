@@ -30,6 +30,7 @@
 volatile uint8_t counter = 0;
 volatile uint8_t cursor_pos = 9;
 volatile uint8_t cursor_update_flag = 0;
+volatile uint8_t confirm_update_flag = 0;
 volatile uint8_t a = 1;
 volatile uint8_t b = 1;
 volatile int8_t acc = 0;
@@ -39,11 +40,12 @@ volatile uint8_t previous_rotary_state = (1 << 1) | 1;
 
 void __interrupt() isr() // interrupt vector
 {
-    if (IOCIF && (IOCAF)) // if IOC set and IOC flag
+    if (IOCIF && (IOCAF0 || IOCAF1)) // if IOC set and IOC flag
     {
 
         // clear flag
-        IOCAF = 0;
+        IOCAF0 = 0;
+        IOCAF1 = 0;
         IOCIF = 0;
 
         a = PORTAbits.RA0;
@@ -102,16 +104,19 @@ void __interrupt() isr() // interrupt vector
         else if (acc <= -4 && current_rotary_state == ((1 << 1) | 1))
         {
             cursor_pos = (cursor_pos -1) & 0x0F;
-            // if (cursor_pos > 15)
-            // {
-            //     cursor_pos = 0;
-            // }
             cursor_update_flag = 1;
             acc = 0;
         }
         previous_rotary_state = current_rotary_state;
         
         
+        
+    }
+    if (IOCIF && IOCAF2)
+    {
+        IOCAF2 = 0;
+        IOCIF = 0;
+        confirm_update_flag = 1;
         
     }
 }
@@ -132,14 +137,16 @@ int main()
     IOCAP =  0b00000011; // rising edge
     IOCAF = 0; // flag
     IOCANbits.IOCAN0 = 1; // falling edge        
-    IOCANbits.IOCAN1 = 1; // falling edge 
+    IOCANbits.IOCAN1 = 1; // falling edge
+    // for switch
+    IOCANbits.IOCAN2 = 1; // falling edge  
 
     LCD1602_init(16, 2);
 
     LCD1602_setCursor(0, 0);
     LCD1602_print("[ ]");
     LCD1602_setCursor(0, 1);
-    LCD1602_print("[  ]");
+    LCD1602_print("[ ]");
 
     LCD1602_setCursor(7, 0);
     LCD1602_print("Vand (L)");
@@ -160,6 +167,14 @@ int main()
             LCD1602_setCursor(cursor_pos, 0);
             cursor_update_flag = 0;
             __delay_ms(1);
+        }
+        if (confirm_update_flag)
+        {
+            LCD1602_setCursor(cursor_pos, 0);
+            LCD1602_print("x");
+            confirm_update_flag = 0;
+            __delay_ms(1);
+
         }
         
 
