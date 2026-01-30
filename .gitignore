@@ -33,3 +33,12 @@ compile_commands.json
 *.DS_Store
 *.vscode/
 out/
+.generated_files/
+dist/
+nbproject/
+Makefile*
+Package-*
+private/
+!cmake/**/user.cmake
+cmake/**/.generated/*
+cmake/**/CMake*
