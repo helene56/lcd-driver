@@ -6,10 +6,7 @@
  */
 
 #include <builtins.h>
-// #include <pic12f1571.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <xc.h>
 #include "lcd1602_pcf8574.h"
 
@@ -37,6 +34,9 @@ volatile int8_t acc = 0;
 
 volatile uint8_t current_rotary_state = (1 << 1) | 1;
 volatile uint8_t previous_rotary_state = (1 << 1) | 1;
+int8_t states[] = {0, -1, 1, 0, 1, 0,
+                          0, -1, -1, 0, 0,
+                           1, 0, 1, -1};
 
 void __interrupt() isr() // interrupt vector
 {
@@ -52,48 +52,15 @@ void __interrupt() isr() // interrupt vector
         b = PORTAbits.RA1;
         
         current_rotary_state = (uint8_t)((a << 1) | b);
-        // turn clockwise 
+        // turn clockwise - opposite for anticlockwise
         // pattern
         // 11    01
         // 01    00
         // 00    10
         // 10    11
         // prev, curr
-        if (previous_rotary_state == ((1 << 1) | 1) && current_rotary_state == ((0 << 1) | 1))
-        {
-            acc++;
-        }
-        else if (previous_rotary_state == ((0 << 1) | 1) && current_rotary_state == ((0 << 1) | 0))
-        {
-            acc++;
-        }
-        else if (previous_rotary_state == ((0 << 1) | 0) && current_rotary_state == ((1 << 1) | 0))
-        {
-            acc++;
-        }
-        else if (previous_rotary_state == ((1 << 1) | 0) && current_rotary_state == ((1 << 1) | 1))
-        {
-            acc++;
-        }
-
-        if (previous_rotary_state == ((1 << 1) | 1) && current_rotary_state == ((1 << 1) | 0))
-        {
-            acc--;
-        }
-        else if (previous_rotary_state == ((1 << 1) | 0) && current_rotary_state == ((0 << 1) | 0))
-        {
-            acc--;
-        }
-        else if (previous_rotary_state == ((0 << 1) | 0) && current_rotary_state == ((0 << 1) | 1))
-        {
-            acc--;
-        }
-        else if (previous_rotary_state == ((0 << 1) | 1) && current_rotary_state == ((1 << 1) | 1))
-        {
-            acc--;
-        }
         
-
+        acc += states[(previous_rotary_state << 2) | current_rotary_state];
 
         if (acc >= 4 && current_rotary_state == ((1 << 1) | 1))
         {
