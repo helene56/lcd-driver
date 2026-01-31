@@ -34,9 +34,9 @@ volatile int8_t acc = 0;
 
 volatile uint8_t current_rotary_state = (1 << 1) | 1;
 volatile uint8_t previous_rotary_state = (1 << 1) | 1;
-int8_t states[] = {0, -1, 1, 0, 1, 0,
+static int8_t states[] = {0, -1, 1, 0, 1, 0,
                           0, -1, -1, 0, 0,
-                           1, 0, 1, -1};
+                           1, 0, 1, -1, 0};
 
 void __interrupt() isr() // interrupt vector
 {
@@ -114,18 +114,24 @@ int main()
     LCD1602_print("[ ]");
     LCD1602_setCursor(0, 1);
     LCD1602_print("[ ]");
-
-    LCD1602_setCursor(7, 0);
-    LCD1602_print("Vand (L)");
-    LCD1602_setCursor(7, 1);
-    LCD1602_print("Temp (");
+    // start quantity water
+    LCD1602_setCursor(4, 0);
+    LCD1602_print("100");
+    // start quantity temperature
+    LCD1602_setCursor(4, 1);
+    LCD1602_print("65");
+    LCD1602_setCursor(8, 0);
+    LCD1602_print("Vand(mL)");
+    LCD1602_setCursor(8, 1);
+    LCD1602_print("Temp(");
     LCD1602_setCursor(13, 1);
     char dot = 0xdf;
     LCD1602_print(&dot);
     LCD1602_setCursor(14, 1);
     LCD1602_print("C)");
     LCD1602_setCursor(cursor_pos, 0);
-    LCD1602_cursor_blink_on();
+    // LCD1602_cursor_blink_on();
+    LCD1602_setCursor(1, 0);
     while (1)
     {
 
