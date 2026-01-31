@@ -156,7 +156,7 @@ void LCD1602_init(uint8_t cols, uint8_t rows)
     }
 
     // Display ON, cursor OFF, blink OFF
-    lcd_command(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF);
+    lcd_command(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKOFF);
 
     // Clear display
     LCD1602_clear();
