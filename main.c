@@ -38,7 +38,7 @@ static int8_t states[] = {0, -1, 1, 0, 1, 0,
                           0, -1, -1, 0, 0,
                            1, 0, 1, -1, 0};
 
-
+volatile uint8_t qty_states[] = {0, 0};
 
 volatile uint8_t water_confirm = 0;
 volatile uint8_t temp_confirm = 0;
@@ -158,7 +158,8 @@ int main()
     IOCANbits.IOCAN0 = 1; // falling edge        
     IOCANbits.IOCAN1 = 1; // falling edge
     // for switch
-    IOCANbits.IOCAN2 = 1; // falling edge  
+    IOCAPbits.IOCAP2 = 1; // rising edge
+
 
     LCD1602_init(16, 2);
 
@@ -230,58 +231,38 @@ int main()
         }
         if (confirm_update_flag)
         {
-            // LCD1602_setCursor(cursor_pos, 0);
-            LCD1602_setCursor(cursor_pos, select_row);
+
             if (row_confirm == 0)
             {
-                // row has been selected - now qty can be chosen
+                LCD1602_cursor_blink_off();
                 row_confirm = 1;
-                // next time it should select and put and x
-
+                if (qty_states[select_row])
+                {
+                    LCD1602_print(empty_val);
+                    qty_states[select_row] = 0;
+                }
+                LCD1602_setCursor(cursor_pos, select_row);
             }
             else if (row_confirm == 1)
             {
-                // qty has been confirmed and it will be marked with x
-                // now we can move between the two quanitites again
-                if (select_row == 0)
+                if (!qty_states[select_row])
                 {
-                    water_confirm ^= 1;
-                    if (water_confirm)
-                    {
-                        LCD1602_print(confirm_val);
-                    }
-                    else
-                    {
-                        LCD1602_print(empty_val);
-                    }
+                    LCD1602_print(confirm_val);
+                    qty_states[select_row] = 1;
                 }
-                else if (select_row == 1)
+                else
                 {
-                    temp_confirm ^= 1;
-                    if (temp_confirm)
-                    {
-                        LCD1602_print(confirm_val);
-                    }
-                    else
-                    {
-                        LCD1602_print(empty_val);
-                    }
+                    LCD1602_print(empty_val);
+                    qty_states[select_row] = 0;
                 }
-                LCD1602_setCursor(cursor_pos, select_row);
                 
-                // LCD1602_print("x");
-                // if (select_row == 0)
-                // {
-                //     water_confirm = 1;
-                // }
-                // else if (select_row == 1)
-                // {
-                //     temp_confirm = 1;
-                // }
+                LCD1602_setCursor(cursor_pos, select_row);
+                LCD1602_cursor_blink_on();
                 row_confirm = 0;
+                
+                
             }
 
-            
             
             confirm_update_flag = 0;
             __delay_ms(1);
