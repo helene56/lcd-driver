@@ -211,6 +211,6 @@ void LCD1602_cursor_blink_on(void)
 
 void LCD1602_cursor_blink_off(void)
 {
-    lcd_command(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF);
+    lcd_command(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKOFF);
 }
 
