@@ -40,6 +40,11 @@ static int8_t states[] = {0, -1, 1, 0, 1, 0,
 
 volatile uint8_t qty_states[] = {0, 0};
 
+static uint8_t row_positions[] = {0, 1, 1};
+static uint8_t col_positions[] = {1,1,14};
+
+volatile int8_t idx = 0;
+
 volatile uint8_t water_confirm = 0;
 volatile uint8_t temp_confirm = 0;
 volatile uint8_t row_confirm = 0;
@@ -96,6 +101,8 @@ void __interrupt() isr() // interrupt vector
             {
                 // toggle the row value only want row 0 or row 1
                 select_row = 1;
+                idx++;
+                if (idx == 3) idx = 0;
             }
             cursor_update_flag = 1;
             acc = 0;
@@ -121,6 +128,8 @@ void __interrupt() isr() // interrupt vector
             {
                 // toggle the row value only want row 0 or row 1
                 select_row = 0;
+                idx--;
+                if (idx == -1) idx = 2;
             }
 
             cursor_update_flag = 1;
@@ -175,13 +184,18 @@ int main()
     LCD1602_print(temp_display);
     LCD1602_setCursor(8, 0);
     LCD1602_print("Vand(dL)");
+    // LCD1602_setCursor(8, 1);
+    // LCD1602_print("Temp(");
     LCD1602_setCursor(8, 1);
-    LCD1602_print("Temp(");
-    LCD1602_setCursor(13, 1);
     char dot = 0xdf;
+    char ro = 0xdb;
     LCD1602_print(&dot);
-    LCD1602_setCursor(14, 1);
-    LCD1602_print("C)");
+    LCD1602_setCursor(9, 1);
+    LCD1602_print("C");
+    LCD1602_setCursor(11, 1);
+    LCD1602_print("ok");
+    LCD1602_setCursor(13, 1);
+    LCD1602_print("[ ]");
     LCD1602_setCursor(cursor_pos, 0);
     LCD1602_cursor_blink_on();
 
@@ -219,7 +233,7 @@ int main()
             }
             else
             {
-                LCD1602_setCursor(cursor_pos, select_row);
+                LCD1602_setCursor(col_positions[idx], row_positions[idx]);
                 
             }
             cursor_update_flag = 0;
@@ -231,8 +245,20 @@ int main()
         }
         if (confirm_update_flag)
         {
-
-            if (row_confirm == 0)
+            // ok - confirm choices
+            if (col_positions[idx] == 14)
+            {
+                if (qty_states[0] && qty_states[1])
+                {
+                    LCD1602_print(confirm_val);
+                    LCD1602_setCursor(col_positions[idx], select_row);
+                }
+                else
+                {
+                    LCD1602_setCursor(1, 0);
+                }
+            }
+            else if (row_confirm == 0)
             {
                 LCD1602_cursor_blink_off();
                 row_confirm = 1;
